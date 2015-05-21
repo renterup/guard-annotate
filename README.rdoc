@@ -61,6 +61,18 @@ You can annotate your tests and fixtures files with (default is false):
       ...
     end
 
+You can exclude annotations in factory files with (default is true):
+
+    guard 'annotate', :factories => false do
+      ...
+    end
+
+You can exclude annotations in serializers with (default is true):
+
+    guard 'annotate', :serializers => false do
+      ...
+    end
+
 You can disable run at start with (default is true):
 
     guard 'annotate', :run_at_start => false do

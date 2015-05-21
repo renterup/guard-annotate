@@ -81,6 +81,30 @@ RSpec.describe Guard::Annotate do
       end
     end
 
+    describe "factories" do
+      it "should run factories annotations by default" do
+        expect(subject.options[:factories]).to be_truthy
+      end
+
+      it "should allow user to exclude factories annotations if desired" do
+        subject = Guard::Annotate.new(:factories => false)
+        expect(subject).to receive(:system).with("bundle exec annotate --exclude tests,fixtures,factories -p before")
+        subject.start
+      end
+    end
+
+    describe "serializers" do
+      it "should run serializers annotations by default" do
+        expect(subject.options[:serializers]).to be_truthy
+      end
+
+      it "should allow user to exclude serializers annotations if desired" do
+        subject = Guard::Annotate.new(:serializers => false)
+        expect(subject).to receive(:system).with("bundle exec annotate --exclude tests,fixtures,serializers -p before")
+        subject.start
+      end
+    end
+
     describe "sort columns by name" do
       it "should not sort columns by name by default" do
         expect(subject.options[:sort]).to be_falsey
