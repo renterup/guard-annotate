@@ -12,6 +12,7 @@ module Guard
 
       options[:notify] = true if options[:notify].nil?
       options[:position] = 'before' if options[:position].nil?
+      options[:models] = true if options[:models].nil?
       options[:tests] = false if options[:tests].nil?
       options[:factories] = true if options[:factories].nil?
       options[:serializers] = true if options[:serializers].nil?
@@ -55,6 +56,10 @@ module Guard
       options[:position]
     end
 
+    def annotate_models?
+      options[:models]
+    end
+
     def annotate_routes?
       options[:routes]
     end
@@ -94,19 +99,24 @@ module Guard
 
     def run_annotate
       Compat::UI.info 'Running annotate', :reset => true
-      started_at = Time.now
-      annotate_models_options, annotate_options = '', ''
 
-      annotate_models_command = "bundle exec annotate #{annotate_excludes} -p #{annotation_position}"
-      annotate_models_options += ' --sort' if annotate_sort_columns?
-      annotate_models_options += ' --show-indexes' if show_indexes?
-      annotate_models_options += ' --simple-indexes' if simple_indexes?
-      annotate_models_options += ' --show-migration' if show_migration?
-      annotate_options += " --format=#{annotate_format}" if annotate_format?
+      @result = ''
+      annotate_options = annotate_format? ? " --format=#{annotate_format}" : ''
 
-      annotate_models_command += annotate_models_options + annotate_options
-      @result = system(annotate_models_command)
-      Notifier::notify(@result, Time.now - started_at) if notify?
+      if annotate_models?
+        started_at = Time.now
+        annotate_models_options = ''
+
+        annotate_models_command = "bundle exec annotate #{annotate_excludes} -p #{annotation_position}"
+        annotate_models_options += ' --sort' if annotate_sort_columns?
+        annotate_models_options += ' --show-indexes' if show_indexes?
+        annotate_models_options += ' --simple-indexes' if simple_indexes?
+        annotate_models_options += ' --show-migration' if show_migration?
+
+        annotate_models_command += annotate_models_options + annotate_options
+        @result = system(annotate_models_command)
+        Notifier::notify(@result, Time.now - started_at) if notify?
+      end
 
       if annotate_routes?
         started_at = Time.now
