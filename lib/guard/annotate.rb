@@ -18,6 +18,8 @@ module Guard
       options[:serializers] = true if options[:serializers].nil?
       options[:sort] = false if options[:sort].nil?
       options[:routes] = false if options[:routes].nil?
+      options[:routes_dir] = 'doc' if options[:routes_dir].nil?
+      options[:routes_file] = 'routes.txt' if options[:routes_file].nil?
       options[:run_at_start] = true if options[:run_at_start].nil?
       options[:show_indexes] = false if options[:show_indexes].nil?
       options[:simple_indexes] = false if options[:simple_indexes].nil?
@@ -101,13 +103,14 @@ module Guard
       Compat::UI.info 'Running annotate', :reset => true
 
       @result = ''
-      annotate_options = annotate_format? ? " --format=#{annotate_format}" : ''
 
       if annotate_models?
         started_at = Time.now
-        annotate_models_options = ''
+        annotate_options = annotate_format? ? " --format=#{annotate_format}" : ''
 
         annotate_models_command = "bundle exec annotate #{annotate_excludes} -p #{annotation_position}"
+
+        annotate_models_options = ''
         annotate_models_options += ' --sort' if annotate_sort_columns?
         annotate_models_options += ' --show-indexes' if show_indexes?
         annotate_models_options += ' --simple-indexes' if simple_indexes?
@@ -120,14 +123,11 @@ module Guard
 
       if annotate_routes?
         started_at = Time.now
-        position = if %w[after before].include? options[:routes].to_s
-          options[:routes]
-        else
-          annotation_position
-        end
-        annotate_routes_command = "bundle exec annotate -r -p #{position}"
+        annotate_routes_command = "mkdir -p #{options[:routes_dir]}; "
 
-        annotate_routes_command += annotate_options
+        rel_path = File.join(options[:routes_dir], options[:routes_file])
+        annotate_routes_command += "bundle exec rake routes > #{rel_path}"
+
         @result = system(annotate_routes_command)
         Notifier::notify(@result, Time.now - started_at) if notify?
       end
